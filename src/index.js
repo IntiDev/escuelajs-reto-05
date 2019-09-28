@@ -1,23 +1,23 @@
 const $app = document.getElementById('app');
 const $observe = document.getElementById('observe');
-const API = 'https://rickandmortyapi.com/api/character/';
+const API = 'https://us-central1-escuelajs-api.cloudfunctions.net/characters';
+// const API = 'https://rickandmortyapi.com/api/character/';
+
+window.onload = localStorage.clear();
 
 const getData = api => {
-  fetch(api)//window.fetch
+  fetch(api)
     .then(response => response.json())
     .then(response => {
-      // debugger
       const characters = response.results;
-      const next_fetch = localStorage.setItem('nextData',response.info.next); //Primer problema
-      // debugger
-      const next_data = localStorage.getItem('nextData');
-      let output = characters.map(character => { //función
+      localStorage.setItem('nextData',response.info.next);
+      let output = characters.map(character => {
         return `
-      <article class="Card">
+        <article class="Card">
         <img src="${character.image}" />
         <h2>${character.id}<span>${character.name}</span><span>${character.species}</span></h2>
-      </article>
-    `
+        </article>
+        `
       }).join('');
       let newItem = document.createElement('section');
       newItem.classList.add('Items');
@@ -25,19 +25,30 @@ const getData = api => {
       $app.appendChild(newItem);
     })
     .catch(error => console.log(error));
-}
-
-const loadData = () => {
-  getData(API);
-}
-
-const intersectionObserver = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) {
-    loadData();
   }
+
+  const loadData = async () => {
+    if(localStorage.getItem('nextData') === null){
+      return await getData(API);
+    }
+    else if(localStorage.getItem('nextData') === ''){
+      let messageContainer = document.createElement('h2');
+      messageContainer.innerHTML = 'Ya no hay personajes..';
+      $app.appendChild(messageContainer);
+      intersectionObserver.unobserve($observe);
+    }
+    else {
+      let next_fetch = localStorage.getItem('nextData');
+      return await getData(next_fetch);
+    }
+  }
+
+  const intersectionObserver = new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) {
+      loadData();
+    }
 }, {
   rootMargin: '0px 0px 100% 0px',
 });
 
 intersectionObserver.observe($observe);
-
