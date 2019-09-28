@@ -3,15 +3,19 @@ const $observe = document.getElementById('observe');
 const API = 'https://rickandmortyapi.com/api/character/';
 
 const getData = api => {
-  fetch(api)
+  fetch(api)//window.fetch
     .then(response => response.json())
     .then(response => {
+      // debugger
       const characters = response.results;
-      let output = characters.map(character => {
+      const next_fetch = localStorage.setItem('nextData',response.info.next); //Primer problema
+      // debugger
+      const next_data = localStorage.getItem('nextData');
+      let output = characters.map(character => { //función
         return `
       <article class="Card">
         <img src="${character.image}" />
-        <h2>${character.name}<span>${character.species}</span></h2>
+        <h2>${character.id}<span>${character.name}</span><span>${character.species}</span></h2>
       </article>
     `
       }).join('');
@@ -36,3 +40,4 @@ const intersectionObserver = new IntersectionObserver(entries => {
 });
 
 intersectionObserver.observe($observe);
+
